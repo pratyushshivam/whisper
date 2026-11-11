@@ -136,6 +136,12 @@ describe("share links", () => {
       expect(back!.steps.map((s) => s.check?.passed)).toEqual(steps.map((s) => s.check?.passed));
     }
   });
+  it("keep long sentences whole", () => {
+    const long = "Breaking news: " + "a very long and winding sentence about a kite ".repeat(3).trim() + "!";
+    const back = decodeChain(encodeChain({ sentence: "The kite flew.", careful: false, steps: [{ listener: "announcer", heard: "The kite flew.", said: long, by: "model", drift: 1 }] }));
+    expect(back!.steps[0]!.said).toBe(long);
+    expect(back!.steps[0]!.by).toBe("model");
+  });
   it("refuse anything broken or unclean", () => {
     expect(decodeChain("not-a-chain")).toBeNull();
     const bad = btoa(JSON.stringify({ v: 1, s: "What the hell.", l: "w", c: 0, t: ["Oh no."], b: "l" }));

@@ -2,7 +2,7 @@
  * A finished chain packed into a link. Generation is not repeatable, so the
  * link carries the sentences themselves, not a seed.
  */
-import { cleanInput, isClean } from "./clean";
+import { isClean } from "./clean";
 import { drift } from "./drift";
 import type { Step } from "./chain";
 import { BY_ID, BY_KEY } from "./listeners";
@@ -58,10 +58,12 @@ export function decodeChain(code: string): Saved | null {
     if (wire.v !== 1 || typeof wire.s !== "string" || !Array.isArray(wire.t)) return null;
     const keys = [...wire.l];
     if (keys.length < 1 || keys.length > 12 || keys.length !== wire.t.length) return null;
+    // Text from a link is shown as text only, but it is still held to the page's rules:
+    // plain characters, a sane length, and the family filter.
     const tidy = (t: unknown): string | null => {
       if (typeof t !== "string" || t.length > 400) return null;
-      const c = cleanInput(t);
-      return c && isClean(c) ? c : null;
+      const c = t.replace(/[\u0000-\u001f<>{}[\]\|`^~_*#@=+]/g, " ").replace(/\s+/g, " ").trim();
+      return /[a-zA-Z]{2}/.test(c) && isClean(c) ? c : null;
     };
     const sentence = tidy(wire.s);
     if (!sentence) return null;
