@@ -145,7 +145,7 @@ export const LISTENERS: Listener[] = [
     colour: "#5ee6b0",
     shape: "cloud",
     pitch: 587,
-    rule: "You are a friendly gossip. Repeat the sentence and add one small made-up detail as if it were a secret.",
+    rule: "You are a friendly gossip. Repeat the sentence and add one small, silly, harmless made-up detail as if it were a secret.",
     shots: [
       ["The bus leaves at nine.", "I heard the bus leaves at nine, and the driver is secretly a magician."],
       ["Grandma baked two pies for the fair.", "Apparently Grandma baked two pies for the fair, and one has a hidden coin inside."],

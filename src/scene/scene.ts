@@ -76,7 +76,7 @@ export interface Ring {
 /** Where the ring sits in a stage of this size. Shared with the page's layout. */
 export function ringFor(w: number, h: number): Ring {
   const phone = w < 700;
-  const r = phone ? Math.max(20, Math.min(30, w * 0.066)) : Math.max(28, Math.min(46, Math.min(w, h) * 0.056));
+  const r = phone ? Math.max(21, Math.min(32, w * 0.07)) : Math.max(30, Math.min(58, Math.min(w, h) * 0.07));
   const rx = phone ? w / 2 - r - 10 : Math.min(w / 2 - r - 56, h * 0.98, 620);
   const ry = h / 2 - r - (phone ? 26 : 34);
   return {
@@ -85,7 +85,7 @@ export function ringFor(w: number, h: number): Ring {
     rx,
     ry,
     r,
-    innerW: Math.min(2 * rx - 2 * r - (phone ? 30 : 110), 560),
+    innerW: Math.min(2 * rx - 2 * r - (phone ? 26 : 110), 600),
     innerH: 2 * ry - 2 * r - (phone ? 70 : 90),
     phone,
   };
@@ -110,6 +110,8 @@ export class Scene {
   private last = 0;
   private time = 0;
   private stars: Float32Array;
+  /** The track the listeners stand on, sampled at even steps of distance: x,y pairs. */
+  private track = new Float32Array(0);
   reduced = false;
   /** Called when a stream lands on a listener. */
   onArrive: ((id: string) => void) | null = null;
@@ -168,6 +170,7 @@ export class Scene {
     this.canvas.width = Math.round(w * this.dpr);
     this.canvas.height = Math.round(h * this.dpr);
     this.ring = ringFor(w, h);
+    this.buildTrack();
     this.place();
     this.wake();
   }
@@ -179,14 +182,48 @@ export class Scene {
     this.place();
   }
 
+  /**
+   * The track is a squared-off oval (a superellipse), which keeps the
+   * listeners near the edges and leaves the middle for the sentence. It is
+   * walked once here so that points can be asked for by distance, not angle.
+   */
+  private buildTrack(): void {
+    const { cx, cy, rx, ry, phone } = this.ring;
+    const e = phone ? 0.5 : 0.72;
+    const fine = 1440;
+    const xs = new Float32Array(fine + 1);
+    const ys = new Float32Array(fine + 1);
+    const len = new Float32Array(fine + 1);
+    for (let i = 0; i <= fine; i++) {
+      const a = -Math.PI / 2 + (Math.PI * 2 * i) / fine;
+      const c = Math.cos(a);
+      const s = Math.sin(a);
+      xs[i] = cx + rx * Math.sign(c) * Math.abs(c) ** e;
+      ys[i] = cy + ry * Math.sign(s) * Math.abs(s) ** e;
+      len[i] = i === 0 ? 0 : len[i - 1]! + Math.hypot(xs[i]! - xs[i - 1]!, ys[i]! - ys[i - 1]!);
+    }
+    const even = 720;
+    this.track = new Float32Array(even * 2);
+    let j = 0;
+    for (let k = 0; k < even; k++) {
+      const want = (len[fine]! * k) / even;
+      while (j < fine && len[j + 1]! < want) j++;
+      const span = len[j + 1]! - len[j]! || 1;
+      const u = (want - len[j]!) / span;
+      this.track[k * 2] = xs[j]! + (xs[j + 1]! - xs[j]!) * u;
+      this.track[k * 2 + 1] = ys[j]! + (ys[j + 1]! - ys[j]!) * u;
+    }
+  }
+
   private place(): void {
-    const { cx, cy, rx, ry } = this.ring;
     const n = this.line.length;
+    const even = this.track.length / 2;
+    if (even === 0) return;
     this.line.forEach((id, k) => {
       const b = this.byId.get(id)!;
-      const a = -Math.PI / 2 + (Math.PI * 2 * k) / n;
-      b.tx = cx + rx * Math.cos(a);
-      b.ty = cy + ry * Math.sin(a);
+      const at = Math.round((even * k) / n) % even;
+      b.tx = this.track[at * 2]!;
+      b.ty = this.track[at * 2 + 1]!;
       if (!b.placed || this.reduced) {
         b.cx = b.tx;
         b.cy = b.ty;
@@ -374,7 +411,7 @@ export class Scene {
         const hx = b.home[i * 2]!;
         const hy = b.home[i * 2 + 1]!;
         const ph = b.phase[i]!;
-        const drift = still ? 0 : R * (0.035 + 0.3 * asleep);
+        const drift = still ? 0 : R * (0.022 + 0.3 * asleep);
         const gx = b.cx + sx + (hx * cs - hy * sn) * R * scale + Math.cos(t * (0.7 + 0.5 * asleep) + ph) * drift;
         const gy = b.cy + (hx * sn + hy * cs) * R * scale + Math.sin(t * (0.9 + 0.4 * asleep) + ph * 1.7) * drift;
         if (still) {
@@ -427,14 +464,15 @@ export class Scene {
     ctx.fill();
 
     // The dotted path the sentence takes.
-    const n = this.line.length;
     ctx.globalAlpha = 0.2;
     ctx.beginPath();
-    const beads = this.ring.phone ? 64 : 120;
-    for (let i = 0; i < beads; i++) {
-      const a = (Math.PI * 2 * i) / beads + (this.reduced ? 0 : t * 0.02);
-      const x = this.ring.cx + this.ring.rx * Math.cos(a);
-      const y = this.ring.cy + this.ring.ry * Math.sin(a);
+    const beads = this.ring.phone ? 72 : 120;
+    const even = this.track.length / 2;
+    const creep = this.reduced ? 0 : (t * 2) % (even / beads);
+    for (let i = 0; i < beads && even > 0; i++) {
+      const at = Math.floor((even * i) / beads + creep) % even;
+      const x = this.track[at * 2]!;
+      const y = this.track[at * 2 + 1]!;
       ctx.moveTo(x + 1.1, y);
       ctx.arc(x, y, 1.1, 0, 6.2832);
     }
@@ -466,7 +504,7 @@ export class Scene {
       }
     }
 
-    const dotR = R * (this.ring.phone ? 0.082 : 0.07);
+    const dotR = R * (this.ring.phone ? 0.086 : 0.078);
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
     for (const b of this.bodies) {
@@ -564,6 +602,5 @@ export class Scene {
       }
     }
     ctx.globalAlpha = 1;
-    void n;
   }
 }

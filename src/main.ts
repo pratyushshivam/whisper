@@ -618,7 +618,7 @@ function finish(saved: Saved): void {
   const n = saved.steps.length;
   $("end-first").textContent = saved.sentence;
   const endLast = $("end-last");
-  wordsInto(endLast, saved.sentence, last.said, l.colour);
+  wordsInto(endLast, null, last.said, l.colour);
   endLast.dataset.size = last.said.length > 110 ? "s" : last.said.length > 60 ? "m" : "l";
   panels.end.style.setProperty("--c", l.colour);
   $("end-label").textContent = `It came out, ${n} listeners later, as`;

@@ -15,7 +15,7 @@ const BLOCKED = [
   "nude", "naked", "boob", "penis", "vagina", "kill", "murder", "suicide", "stab", "shoot", "gun", "bomb",
   "terror", "nazi", "hitler", "drug", "cocaine", "heroin", "meth", "weed", "drunk", "beer", "vodka", "whiskey",
   "wine", "cigarette", "dead", "die", "dies", "died", "death", "corpse", "blood", "bloody", "hell", "hate",
-  "stupid", "idiot", "moron", "dumb", "ugly", "fat", "bum", "butt", "ass", "poop", "fart",
+  "stupid", "idiot", "moron", "dumb", "ugly", "fat", "bum", "butt", "ass", "poop", "fart", "zombie", "flesh", "poison", "weapon", "knife", "grave", "coffin", "vomit", "puke", "demon", "devil", "satan",
 ];
 const EXACT = new Set(["bum", "butt", "ass", "die", "dies", "died", "fat", "hell", "gun", "sex", "fag", "weed", "wine", "beer", "meth", "dead", "hate", "arse", "stab", "dumb", "ugly", "kill", "drug", "cock", "dick", "crap", "damn", "piss"]);
 

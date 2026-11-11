@@ -26,7 +26,7 @@ const pick = <T>(list: readonly T[], rng: Rng): T => list[Math.floor(rng() * lis
 
 const DET = new Set("the a an my your our his her their this that some every".split(" "));
 const ADJ = new Set(
-  "warm big little small old new red blue green yellow good bad happy sad hot cold long short tall tiny huge best nice great funny quiet loud soft fast slow first last whole next brave shiny sleepy famous golden royal grand magnificent legendary".split(
+  "warm big little small old new red blue green yellow good bad happy sad hot cold long short tall tiny huge best nice great funny quiet loud soft fast slow first last whole next brave shiny sleepy famous golden royal grand magnificent legendary dazzling tiny".split(
     " ",
   ),
 );
@@ -70,7 +70,7 @@ function nounSpots(ws: string[]): number[] {
   for (let i = 0; i < ws.length - 1; i++) {
     if (!DET.has(bare(ws[i]!))) continue;
     let j = i + 1;
-    while (j < ws.length - 1 && ADJ.has(bare(ws[j]!))) j++;
+    while (j < ws.length - 1 && (ADJ.has(bare(ws[j]!)) || ws[j]!.includes("-"))) j++;
     if (!DET.has(bare(ws[j]!)) && !NOT_NOUN.has(bare(ws[j]!))) out.push(j);
   }
   return out;
