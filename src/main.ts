@@ -505,6 +505,8 @@ async function play(sentence: string, saved?: Saved, forceCareful?: boolean): Pr
   renderStatus();
   setMeter(0);
   trailStart(sentence);
+  // The show is on the stage: bring it back into view if the visitor had scrolled away.
+  if (window.scrollY > 40) window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
   document.body.classList.toggle("is-careful", isCareful);
 
   // Generation runs ahead of the show; the show takes steps as they exist.
@@ -565,12 +567,12 @@ async function play(sentence: string, saved?: Saved, forceCareful?: boolean): Pr
       audio.verdict(step.check.passed);
       if (step.check.passed) {
         bubble.dataset.state = "passed";
-        whoNote.textContent = `${fromName} checks: close enough`;
+        whoNote.textContent = `${fromName} ${i === 0 ? "check" : "checks"}: close enough`;
         setMeter(step.drift);
         await wait(900);
       } else {
         bubble.dataset.state = "caught";
-        whoNote.textContent = `${fromName} checks: not what I said`;
+        whoNote.textContent = `${fromName} ${i === 0 ? "check" : "checks"}: not what I said`;
         scene.shake(from);
         await wait(1100);
         if (me.skip) break;
@@ -811,6 +813,13 @@ async function intro(): Promise<void> {
 }
 
 /* ---------- start ---------- */
+
+// Always open on the stage, even on a reload from further down the page.
+try {
+  history.scrollRestoration = "manual";
+} catch {
+  /* old browser */
+}
 
 renderRoster();
 renderStatus();
