@@ -1,0 +1,28 @@
+{
+  "name": "whisper",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The telephone game, played by ten AIs in your browser.",
+  "homepage": "https://pratyushshivam.github.io/whisper/",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite --port 5210",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 5211",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource-variable/anybody": "^5.3.0",
+    "@fontsource-variable/schibsted-grotesk": "^5.3.0",
+    "@huggingface/transformers": "^4.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}
