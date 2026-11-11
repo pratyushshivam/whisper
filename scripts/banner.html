@@ -1,0 +1,156 @@
+<!doctype html>
+<!-- The README banner and the social card. Open through the dev server
+     (/scripts/banner.html, or ?og for the social size) and screenshot #art. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Whisper banner</title>
+    <style>
+      html, body { margin: 0; background: #10157a; }
+      #art {
+        position: relative;
+        width: 1600px;
+        height: 720px;
+        overflow: hidden;
+        background: radial-gradient(ellipse 80% 90% at 50% 40%, #3d4cff 0%, #2a38f2 45%, #1a22c8 100%);
+        color: #fff;
+        font-family: "Schibsted Grotesk Variable", system-ui, sans-serif;
+      }
+      body.og #art { width: 1200px; height: 630px; }
+      canvas { position: absolute; inset: 0; }
+      h1 {
+        position: absolute;
+        left: 84px;
+        top: 44px;
+        margin: 0;
+        font-family: "Anybody Variable", sans-serif;
+        font-weight: 800;
+        font-variation-settings: "wdth" 118;
+        font-size: 208px;
+        letter-spacing: -0.035em;
+        line-height: 1;
+      }
+      body.og h1 { font-size: 150px; left: 64px; top: 34px; }
+      .tag {
+        position: absolute;
+        left: 94px;
+        top: 284px;
+        margin: 0;
+        font-size: 34px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+      }
+      body.og .tag { left: 70px; top: 206px; font-size: 27px; }
+      .tag b { color: #ffd23f; font-weight: 700; }
+      .b {
+        position: absolute;
+        background: #f6f1e7;
+        color: #0a0e3d;
+        border-radius: 26px;
+        padding: 16px 22px 18px;
+        font-weight: 600;
+        font-size: 27px;
+        line-height: 1.2;
+        letter-spacing: -0.012em;
+        box-shadow: 0 22px 60px rgba(5, 8, 60, 0.38);
+      }
+      .b small { font-family: "Schibsted Grotesk Variable", sans-serif; display: block; font-size: 15px; font-weight: 700; opacity: 0.6; margin-bottom: 5px; letter-spacing: 0; }
+      .b mark { background: #ff5d8f; color: inherit; border-radius: 7px; padding: 0 5px; }
+      #first { left: 84px; top: 392px; }
+      #last { right: 84px; top: 356px; font-family: "Anybody Variable", sans-serif; font-weight: 800; font-size: 40px; line-height: 1.08; }
+      body.og #first { left: 64px; top: 300px; font-size: 22px; }
+      body.og #last { right: 64px; top: 276px; font-size: 31px; }
+    </style>
+  </head>
+  <body>
+    <div id="art">
+      <canvas id="c"></canvas>
+      <h1>whisper</h1>
+      <p class="tag">The telephone game, played by <b>ten AIs</b> in your browser.</p>
+      <div class="b" id="first"><small>You say</small>My dog ate seven socks and feels fine.</div>
+      <div class="b" id="last"><small>Ten listeners later</small><mark>Breaking</mark> <mark>news:</mark> <mark>fence</mark> <mark>hopes!</mark></div>
+    </div>
+    <script type="module">
+      import "@fontsource-variable/anybody/wdth.css";
+      import "@fontsource-variable/schibsted-grotesk";
+      import { BY_ID, DEFAULT_LINE } from "../src/core/listeners.ts";
+      import { dotsFor, FACES } from "../src/scene/shapes.ts";
+
+      const og = new URLSearchParams(location.search).has("og");
+      document.body.classList.toggle("og", og);
+      const W = og ? 1200 : 1600;
+      const H = og ? 630 : 720;
+      const c = document.getElementById("c");
+      c.width = W * 2;
+      c.height = H * 2;
+      c.style.width = W + "px";
+      c.style.height = H + "px";
+      const x = c.getContext("2d");
+      x.scale(2, 2);
+
+      // Seeded, so the banner is the same every time it is made.
+      let seed = 7;
+      const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+
+      x.fillStyle = "rgba(255,255,255,0.16)";
+      for (let i = 0; i < 150; i++) {
+        x.beginPath();
+        x.arc(rnd() * W, rnd() * H, 0.8 + rnd() * 1.6, 0, 7);
+        x.fill();
+      }
+
+      const pad = og ? 64 : 84;
+      const R = og ? 40 : 54;
+      const y = H - R - (og ? 54 : 62);
+      const n = DEFAULT_LINE.length;
+      const gap = (W - pad * 2 - R * 2) / (n - 1);
+      const at = (i) => pad + R + gap * i;
+
+      // The sentence in flight between neighbours.
+      DEFAULT_LINE.forEach((id, i) => {
+        if (i === n - 1) return;
+        const a = BY_ID.get(id);
+        const steps = 5;
+        for (let k = 1; k <= steps; k++) {
+          const u = k / (steps + 1);
+          const px = at(i) + R * 1.1 + (gap - R * 2.2) * u;
+          const py = y - Math.sin(u * Math.PI) * R * 0.5;
+          x.fillStyle = a.colour;
+          x.globalAlpha = 0.35 + 0.65 * u;
+          x.beginPath();
+          x.arc(px, py, 2.2 + 2.6 * u, 0, 7);
+          x.fill();
+        }
+      });
+      x.globalAlpha = 1;
+
+      DEFAULT_LINE.forEach((id, i) => {
+        const l = BY_ID.get(id);
+        const dots = dotsFor(l.shape, 0.2);
+        const cx = at(i);
+        x.fillStyle = l.colour;
+        x.beginPath();
+        for (let k = 0; k < dots.length; k += 2) {
+          const px = cx + dots[k] * R;
+          const py = y + dots[k + 1] * R;
+          x.moveTo(px + R * 0.078, py);
+          x.arc(px, py, R * 0.078, 0, 7);
+        }
+        x.fill();
+        const f = FACES[l.shape];
+        const er = f.size * R * 1.25;
+        x.fillStyle = "#0a0e3d";
+        x.beginPath();
+        x.arc(cx - f.gap * R + R * 0.04, y + f.y * R, er, 0, 7);
+        x.arc(cx + f.gap * R + R * 0.04, y + f.y * R, id === "pirate" ? er * 1.45 : er, 0, 7);
+        x.fill();
+        x.fillStyle = "#fff";
+        x.beginPath();
+        x.arc(cx - f.gap * R + R * 0.04 + er * 0.3, y + f.y * R - er * 0.3, er * 0.3, 0, 7);
+        x.arc(cx + f.gap * R + R * 0.04 + er * 0.3, y + f.y * R - er * 0.3, er * 0.3, 0, 7);
+        x.fill();
+      });
+      document.fonts.ready.then(() => (document.body.dataset.ready = "1"));
+    </script>
+  </body>
+</html>

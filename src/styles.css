@@ -484,11 +484,15 @@ a {
 .say[data-size="s"] { font-size: 20px; }
 
 .bubble[data-state="caught"] .say {
-  text-decoration: line-through;
-  text-decoration-color: #c4182d;
-  text-decoration-thickness: 3px;
   opacity: 0.62;
   transition: opacity 0.3s;
+}
+
+.bubble[data-state="caught"] .w,
+.row-back .w {
+  text-decoration: line-through;
+  text-decoration-color: #c4182d;
+  text-decoration-thickness: 0.09em;
 }
 
 .w {
@@ -1049,9 +1053,11 @@ body[data-mode="intro"] .bar > * {
 
 .row-back {
   opacity: 0.66;
-  text-decoration: line-through;
-  text-decoration-color: var(--coral);
   margin-bottom: 6px !important;
+}
+
+.row-back .w {
+  text-decoration-color: var(--coral);
 }
 
 .row-tag {

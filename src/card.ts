@@ -105,6 +105,7 @@ export async function drawCard(saved: Saved): Promise<HTMLCanvasElement> {
     }
   });
   y += r * 2 + 30;
+  ctx.fillStyle = "#ffffff";
   ctx.font = `500 25px ${TEXT}`;
   ctx.globalAlpha = 0.8;
   const names = saved.steps.map((s) => BY_ID.get(s.listener)?.name.replace(/^The /, "") ?? "").join("  →  ");

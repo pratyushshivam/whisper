@@ -15,7 +15,7 @@ const BLOCKED = [
   "nude", "naked", "boob", "penis", "vagina", "kill", "murder", "suicide", "stab", "shoot", "gun", "bomb",
   "terror", "nazi", "hitler", "drug", "cocaine", "heroin", "meth", "weed", "drunk", "beer", "vodka", "whiskey",
   "wine", "cigarette", "dead", "die", "dies", "died", "death", "corpse", "blood", "bloody", "hell", "hate",
-  "stupid", "idiot", "moron", "dumb", "ugly", "fat", "bum", "butt", "ass", "poop", "fart", "zombie", "flesh", "poison", "weapon", "knife", "grave", "coffin", "vomit", "puke", "demon", "devil", "satan",
+  "stupid", "idiot", "moron", "dumb", "ugly", "fat", "bum", "butt", "ass", "poop", "fart", "zombie", "flesh", "poison", "weapon", "knife", "grave", "coffin", "vomit", "puke", "demon", "devil", "satan", "doom", "explo", "destroy", "curse",
 ];
 const EXACT = new Set(["bum", "butt", "ass", "die", "dies", "died", "fat", "hell", "gun", "sex", "fag", "weed", "wine", "beer", "meth", "dead", "hate", "arse", "stab", "dumb", "ugly", "kill", "drug", "cock", "dick", "crap", "damn", "piss"]);
 
@@ -59,7 +59,16 @@ export function cleanOutput(raw: string, heard: string): string {
   if (parts && parts.length >= 1 && !/[.!?]$/.test(s)) s = parts.slice(0, 2).join("").trim();
   let words = s.split(" ");
   if (words.length > MAX_WORDS) {
+    // Too long: stop at the last pause that still leaves a real sentence, else at the limit.
     words = words.slice(0, MAX_WORDS);
+    let cut = -1;
+    for (let i = words.length - 2; i >= 6; i--) {
+      if (/[,;:]$/.test(words[i]!)) {
+        cut = i + 1;
+        break;
+      }
+    }
+    if (cut > 0) words = words.slice(0, cut);
     s = words.join(" ").replace(/[,;:\-]+$/, "") + ".";
   }
   if (!/[.!?]$/.test(s)) s += ".";
