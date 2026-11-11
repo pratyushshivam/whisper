@@ -135,7 +135,7 @@ src/core     the game: listeners, prompts, the chain, careful mode, the light ve
 src/model    the worker that holds the model, and the client that decides whether to load it
 src/scene    the canvas: silhouettes, dots on springs, the stream
 src/main.ts  the page: intro, composing, the show, the line, sharing
-tests        19 tests over everything in src/core
+tests        20 tests over everything in src/core
 ```
 
 ## The model
