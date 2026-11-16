@@ -13,6 +13,7 @@
   <a href="#how-it-works">How it works</a> ·
   <a href="#the-model">The model</a> ·
   <a href="#run-it">Run it</a> ·
+  <a href="https://www.pratyushshivam.com/projects/whisper/">The full write-up</a> ·
   <a href="https://www.pratyushshivam.com/">pratyushshivam.com</a>
 </p>
 
